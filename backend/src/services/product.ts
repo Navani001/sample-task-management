@@ -1,11 +1,23 @@
 import prisma from "../lib/prisma";
 
-export async function GetProducts() {
+export async function GetProducts(filters?: { categoryId?: number; search?: string }) {
   try {
+    // Build where clause based on optional filters
+    const whereClause: any = {
+      isDeleted: false
+    };
+
+    if (filters) {
+      if (filters.categoryId !== undefined) {
+        whereClause.categoryId = filters.categoryId;
+      }
+      if (filters.search) {
+        whereClause.name = { contains: filters.search, mode: 'insensitive' } as any;
+      }
+    }
+
     const products = await prisma.product.findMany({
-      where: {
-        isDeleted: false
-      },
+      where: whereClause,
       include: {
         category: {
           select: {
