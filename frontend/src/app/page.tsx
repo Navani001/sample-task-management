@@ -6,7 +6,7 @@ export default async function Home() {
   
   // Redirect to login if not authenticated
   if (!data?.user) {
-    redirect("/login");
+    redirect("/dashboard");
   }
 
   return (
