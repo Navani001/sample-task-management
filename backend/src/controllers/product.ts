@@ -3,8 +3,20 @@ import { GetProducts, GetSingleProduct, CreateProduct, ModifyProduct, RemoveProd
 
 export async function GetAllProducts(req: FastifyRequest, reply: FastifyReply) {
   try {
-    // Call the GetProducts function
-    const result = await GetProducts();
+    // Read optional query params for filtering
+    const { categoryId, search } = req.query as { categoryId?: string; search?: string };
+
+    const filters: any = {};
+    if (categoryId !== undefined) {
+      const parsed = parseInt(categoryId as string);
+      if (!Number.isNaN(parsed)) filters.categoryId = parsed;
+    }
+    if (search) {
+      filters.search = search;
+    }
+
+    // Call the GetProducts function with filters
+    const result = await GetProducts(filters);
 
     // If successful
     if (result.data) {
