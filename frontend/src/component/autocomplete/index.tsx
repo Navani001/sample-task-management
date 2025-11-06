@@ -11,81 +11,62 @@ import { Plus } from 'lucide-react';
 import { Modals } from '@/component/modal';
 import { InputField } from '@/component/input';
 import { ButtonComponent } from '@/component/button';
-
-export interface Category {
-    id: string;
-    name: string;
-    createdAt?: string;
-}
+import { Category } from '@/services/categoryService';
+import { useCategories } from '@/hooks/useCategories';
 
 interface CategoryAutocompleteProps {
-    value: string;
-    onSelectionChange: (categoryName: string) => void;
-    categories?: string[];
+    value: number;
+    onSelectionChange: (categoryId: number) => void;
     label?: string;
     placeholder?: string;
     isRequired?: boolean;
     variant?: "flat" | "bordered" | "underlined" | "faded";
-    onAddCategory?: (categoryName: string) => Promise<boolean>;
 }
 
 export const CategoryAutocomplete: React.FC<CategoryAutocompleteProps> = ({
     value,
     onSelectionChange,
-    categories = [],
     label = "Category",
     placeholder = "Search or select a category",
     isRequired = false,
-    variant = "bordered",
-    onAddCategory
+    variant = "bordered"
 }) => {
     const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
     const [newCategoryName, setNewCategoryName] = React.useState('');
+    const [newCategoryId, setNewCategoryId] = React.useState('');
     const [isAddingCategory, setIsAddingCategory] = React.useState(false);
     const [searchValue, setSearchValue] = React.useState('');
 
-    // Default categories
-    const defaultCategories = [
-        'Electronics',
-        'Clothing',
-        'Books',
-        'Home & Garden',
-        'Sports',
-        'Toys',
-        'Food & Beverages',
-        'Health & Beauty',
-        'Automotive',
-        'Office Supplies'
-    ];
-
-    // Combine default and custom categories
-    const allCategories = Array.from(new Set([...defaultCategories, ...categories]));
+    // Get categories from API
+    const { categories, addCategory } = useCategories();
 
     // Filter categories based on search
-    const filteredCategories = allCategories.filter(category =>
-        category.toLowerCase().includes(searchValue.toLowerCase())
+    const filteredCategories = categories.filter((category: Category) =>
+        category.name.toLowerCase().includes(searchValue.toLowerCase())
     );
 
     // Check if current search doesn't match any existing category
     const showAddOption = searchValue.trim() !== '' &&
-        !allCategories.some(cat => cat.toLowerCase() === searchValue.toLowerCase());
+        !categories.some((cat: Category) => cat.name.toLowerCase() === searchValue.toLowerCase());
+
+    // Get selected category name for display
+    const selectedCategory = categories.find((cat: Category) => cat.id === value);
+    const displayValue = selectedCategory ? selectedCategory.name : '';
 
     const handleAddNewCategory = async () => {
-        if (!newCategoryName.trim()) return;
+        if (!newCategoryName.trim() || !newCategoryId.trim()) return;
 
         setIsAddingCategory(true);
         try {
-            if (onAddCategory) {
-                const success = await onAddCategory(newCategoryName.trim());
-                if (success) {
-                    onSelectionChange(newCategoryName.trim());
-                    setNewCategoryName('');
-                    setIsAddModalOpen(false);
-                }
-            } else {
-                // If no onAddCategory handler, just select the new category
-                onSelectionChange(newCategoryName.trim());
+            const categoryData = {
+                id: parseInt(newCategoryId.trim()),
+                name: newCategoryName.trim()
+            };
+            const newCategory = await addCategory(categoryData);
+            if (newCategory) {
+                onSelectionChange(newCategory.id);
                 setNewCategoryName('');
+                setNewCategoryId('');
                 setIsAddModalOpen(false);
             }
         } finally {
@@ -96,6 +77,7 @@ export const CategoryAutocomplete: React.FC<CategoryAutocompleteProps> = ({
     const handleQuickAdd = () => {
         if (searchValue.trim()) {
             setNewCategoryName(searchValue.trim());
+            setNewCategoryId(''); // Clear ID field when quick adding
             setIsAddModalOpen(true);
         }
     };
@@ -103,6 +85,15 @@ export const CategoryAutocomplete: React.FC<CategoryAutocompleteProps> = ({
     const ModalContent = (
         <div className="space-y-4">
             <h3 className="text-lg font-semibold">Add New Category</h3>
+            <InputField
+                label="Category ID"
+                placeholder="Enter category ID"
+                value={newCategoryId}
+                inputOnChange={(e) => setNewCategoryId(e.target.value)}
+                isRequired
+                variant="bordered"
+                type="number"
+            />
             <InputField
                 label="Category Name"
                 placeholder="Enter category name"
@@ -122,6 +113,7 @@ export const CategoryAutocomplete: React.FC<CategoryAutocompleteProps> = ({
                 handleOnClick={() => {
                     setIsAddModalOpen(false);
                     setNewCategoryName('');
+                    setNewCategoryId('');
                 }}
                 isIcon={false}
                 baseClassName={isAddingCategory ? 'opacity-50 cursor-not-allowed' : ''}
@@ -129,10 +121,10 @@ export const CategoryAutocomplete: React.FC<CategoryAutocompleteProps> = ({
             <ButtonComponent
                 buttonText="Add Category"
                 ButtonVariant="solid"
-                bgColor={!newCategoryName.trim() || isAddingCategory ? 'bg-gray-300' : 'bg-primary'}
+                bgColor={!newCategoryName.trim() || !newCategoryId.trim() || isAddingCategory ? 'bg-gray-300' : 'bg-primary'}
                 handleOnClick={handleAddNewCategory}
                 isIcon={false}
-                baseClassName={!newCategoryName.trim() || isAddingCategory ? 'opacity-50 cursor-not-allowed' : ''}
+                baseClassName={!newCategoryName.trim() || !newCategoryId.trim() || isAddingCategory ? 'opacity-50 cursor-not-allowed' : ''}
             />
         </div>
     );
@@ -145,25 +137,25 @@ export const CategoryAutocomplete: React.FC<CategoryAutocompleteProps> = ({
                     placeholder={placeholder}
                     variant={variant}
                     isRequired={isRequired}
-                    selectedKey={value}
+                    selectedKey={value ? value.toString() : undefined}
                     onSelectionChange={(key) => {
                         if (key) {
-                            onSelectionChange(key.toString());
+                            onSelectionChange(parseInt(key.toString()));
                         }
                     }}
                     onInputChange={(inputValue) => {
                         setSearchValue(inputValue);
-                        // If user types something that's not in the list, clear selection
-                        if (inputValue !== value) {
-                            onSelectionChange('');
+                        // If user types something that doesn't match selected category, clear selection
+                        if (inputValue !== displayValue) {
+                            onSelectionChange(0);
                         }
                     }}
                     allowsCustomValue
-                    inputValue={searchValue || value}
+                    inputValue={searchValue || displayValue}
                 >
-                    {filteredCategories.map((category) => (
-                        <AutocompleteItem key={category}>
-                            {category}
+                    {filteredCategories.map((category: Category) => (
+                        <AutocompleteItem key={category.id.toString()}>
+                            {category.name}
                         </AutocompleteItem>
                     ))}
                 </Autocomplete>

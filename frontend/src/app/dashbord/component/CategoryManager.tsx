@@ -36,8 +36,8 @@ export const CategoryManager: React.FC = () => {
 
         setIsAdding(true);
         try {
-            const success = await addCategory(newCategoryName.trim());
-            if (success) {
+            const newCategory = await addCategory(newCategoryName.trim());
+            if (newCategory) {
                 setNewCategoryName('');
                 setIsAddModalOpen(false);
             }

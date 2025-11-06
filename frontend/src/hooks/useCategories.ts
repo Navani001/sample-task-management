@@ -9,7 +9,7 @@ interface UseCategoriesReturn {
   categoryNames: string[];
   loading: boolean;
   error: string | null;
-  addCategory: (name: string) => Promise<boolean>;
+  addCategory: (categoryData: { id: number; name: string } | string) => Promise<Category | null>;
   deleteCategory: (id: string) => Promise<boolean>;
   refreshCategories: () => Promise<void>;
 }
@@ -40,31 +40,39 @@ export const useCategories = (): UseCategoriesReturn => {
   }, [addToast]);
 
   // Add new category
-  const addCategory = async (name: string): Promise<boolean> => {
+  const addCategory = async (categoryData: { id: number; name: string } | string): Promise<Category | null> => {
     try {
-      const trimmedName = name.trim();
-      if (!trimmedName) {
-        addToast('Category name cannot be empty', 'error');
-        return false;
+      // Handle both old string format and new object format for backward compatibility
+      let categoryToCreate;
+      if (typeof categoryData === 'string') {
+        const trimmedName = categoryData.trim();
+        if (!trimmedName) {
+          addToast('Category name cannot be empty', 'error');
+          return null;
+        }
+        categoryToCreate = trimmedName;
+      } else {
+        if (!categoryData.name.trim() || !categoryData.id) {
+          addToast('Category ID and name cannot be empty', 'error');
+          return null;
+        }
+        categoryToCreate = categoryData;
       }
 
-      // Check if category already exists
-     
-
-      const newCategory = await categoryService.createCategory(trimmedName);
+      const newCategory = await categoryService.createCategory(categoryToCreate);
       if (newCategory) {
         setCategories(prev => [...prev, newCategory]);
         addToast('Category created successfully!', 'success');
-        return true;
+        return newCategory;
       }
       
       addToast('Failed to create category', 'error');
-      return false;
+      return null;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create category';
       setError(errorMessage);
       addToast(errorMessage, 'error');
-      return false;
+      return null;
     }
   };
 

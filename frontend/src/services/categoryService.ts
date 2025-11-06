@@ -37,9 +37,14 @@ export const categoryService = {
   },
 
   // Create new category
-  createCategory: async (categoryName: string): Promise<Category | null> => {
+  createCategory: async (categoryData: string | { id: number; name: string }): Promise<Category | null> => {
     try {
-      const response = await postRequest<ApiResponse<Category>>(ENDPOINTS.CREATE_CATEGORY, { name: categoryName });
+      // Handle both old string format and new object format
+      const requestData = typeof categoryData === 'string' 
+        ? { name: categoryData }
+        : categoryData;
+        
+      const response = await postRequest<ApiResponse<Category>>(ENDPOINTS.CREATE_CATEGORY, requestData);
       if ((response as any).success && (response as any).data) {
         return (response as any).data;
       }

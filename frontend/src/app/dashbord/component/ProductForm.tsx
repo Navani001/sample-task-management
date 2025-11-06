@@ -2,19 +2,14 @@
 
 import React from 'react';
 import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
     Input,
     Select,
     SelectItem
 } from '@heroui/react';
 import { Product, ProductFormData } from '@/types/product';
-import { CategoryAutocomplete } from './CategoryAutocomplete';
-import { useCategories } from '@/hooks/useCategories';
-import { ButtonComponent } from '@/component/button'; interface ProductFormProps {
+import { CategoryAutocomplete } from '@/component/autocomplete';
+import { ButtonComponent } from '@/component/button';
+import { Modals } from '@/component/modal'; interface ProductFormProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (product: ProductFormData) => Promise<boolean>;
@@ -35,8 +30,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         price: 0,
         stock: 0
     });
-    const [loading, setLoading] = React.useState(false);
-    const { categories, addCategory } = useCategories();    // Reset form when modal opens/closes or initial data changes
+    const [loading, setLoading] = React.useState(false);    // Reset form when modal opens/closes or initial data changes
     React.useEffect(() => {
         if (isOpen) {
             if (initialData) {
@@ -81,98 +75,94 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         }));
     };
 
-    return (
-        <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            placement="top-center"
-            size="lg"
-        >
-            <ModalContent>
-                <form onSubmit={handleSubmit}>
-                    <ModalHeader className="flex flex-col gap-1">
-                        {title}
-                    </ModalHeader>
-                    <ModalBody>
-                        <div className="flex flex-col gap-4">
-                            <Input
-                                autoFocus
-                                label="Product Name"
-                                placeholder="Enter product name"
-                                value={formData.name}
-                                onChange={(e) => handleInputChange('name', e.target.value)}
-                                variant="bordered"
-                                isRequired
-                            />
+    const ModalContent = (
+        <div className="space-y-4">
+            <h3 className="text-lg font-semibold">{title}</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <Input
+                    autoFocus
+                    label="Product Name"
+                    placeholder="Enter product name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    variant="bordered"
+                    isRequired
+                />
 
-                            <Select
-                                label="Category"
-                                placeholder="Select a category"
-                                selectedKeys={formData.categoryId ? [formData.categoryId.toString()] : []}
-                                onSelectionChange={(keys) => {
-                                    const selected = Array.from(keys)[0] as string;
-                                    handleInputChange('categoryId', selected ? parseInt(selected) : 0);
-                                }}
-                                variant="bordered"
-                                isRequired
-                            >
-                                {categories.map((category) => (
-                                    <SelectItem key={category.id.toString()}>
-                                        {category.name}
-                                    </SelectItem>
-                                ))}
-                            </Select>
+                <CategoryAutocomplete
+                    label="Category"
+                    placeholder="Search or select a category"
+                    value={formData.categoryId}
+                    onSelectionChange={(categoryId) => handleInputChange('categoryId', categoryId)}
+                    variant="bordered"
+                    isRequired
+                />
 
-                            <Input
-                                label="Price"
-                                placeholder="0.00"
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={formData.price.toString()}
-                                onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
-                                variant="bordered"
-                                startContent={
-                                    <div className="pointer-events-none flex items-center">
-                                        <span className="text-default-400 text-small">$</span>
-                                    </div>
-                                }
-                                isRequired
-                            />
-
-                            <Input
-                                label="Stock Quantity"
-                                placeholder="0"
-                                type="number"
-                                min="0"
-                                value={formData.stock.toString()}
-                                onChange={(e) => handleInputChange('stock', parseInt(e.target.value) || 0)}
-                                variant="bordered"
-                                isRequired
-                            />
+                <Input
+                    label="Price"
+                    placeholder="0.00"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.price.toString()}
+                    onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
+                    variant="bordered"
+                    startContent={
+                        <div className="pointer-events-none flex items-center">
+                            <span className="text-default-400 text-small">$</span>
                         </div>
-                    </ModalBody>
-                    <ModalFooter>
-                        <ButtonComponent
-                            buttonText="Cancel"
-                            ButtonVariant="flat"
-                            bgColor="bg-red-100"
-                            handleOnClick={onClose}
-                            isIcon={false}
-                            type="button"
-                            baseClassName={loading ? 'opacity-50 cursor-not-allowed' : ''}
-                        />
-                        <ButtonComponent
-                            buttonText={initialData ? 'Update Product' : 'Add Product'}
-                            ButtonVariant="solid"
-                            bgColor="bg-primary"
-                            isIcon={false}
-                            type="submit"
-                            baseClassName={loading ? 'opacity-50 cursor-not-allowed' : ''}
-                        />
-                    </ModalFooter>
-                </form>
-            </ModalContent>
-        </Modal>
+                    }
+                    isRequired
+                />
+
+                <Input
+                    label="Stock Quantity"
+                    placeholder="0"
+                    type="number"
+                    min="0"
+                    value={formData.stock.toString()}
+                    onChange={(e) => handleInputChange('stock', parseInt(e.target.value) || 0)}
+                    variant="bordered"
+                    isRequired
+                />
+            </form>
+        </div>
+    );
+
+    const handleFormSubmit = () => {
+        const event = new Event('submit', { bubbles: true, cancelable: true });
+        handleSubmit(event as unknown as React.FormEvent);
+    };
+
+    const ModalFooter = (
+        <div className="flex gap-2 justify-end">
+            <ButtonComponent
+                buttonText="Cancel"
+                ButtonVariant="flat"
+                bgColor="bg-red-100"
+                handleOnClick={onClose}
+                isIcon={false}
+                type="button"
+                baseClassName={loading ? 'opacity-50 cursor-not-allowed' : ''}
+            />
+            <ButtonComponent
+                buttonText={initialData ? 'Update Product' : 'Add Product'}
+                ButtonVariant="solid"
+                bgColor="bg-primary"
+                isIcon={false}
+                handleOnClick={handleFormSubmit}
+                baseClassName={loading ? 'opacity-50 cursor-not-allowed' : ''}
+            />
+        </div>
+    );
+
+    return (
+        <Modals
+            isopen={isOpen}
+            onClose={onClose}
+            ModalContents={ModalContent}
+            ModalFooterContent={ModalFooter}
+            size="lg"
+        />
     );
 };
