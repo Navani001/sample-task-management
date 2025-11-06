@@ -1,0 +1,60 @@
+// This is your Prisma schema file for the CrimeX project
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User authentication and roles
+model Login {
+  id                Int            @id @default(autoincrement())
+  name              String
+  email             String         @unique
+  password          String         @default("123")
+  role              String         @default("public")
+  logo              String?
+  policeStationId   Int?
+  isDeleted         Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @default(now()) @updatedAt
+}
+
+// Police station information
+
+// Category model for products
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(50)
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  
+  // Relations
+  products  Product[]
+  
+  @@map("categories")
+}
+
+// Product model
+model Product {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  categoryId Int
+  price      Decimal  @db.Decimal(10, 2)
+  stock      Int      @default(0)
+  isDeleted  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+  
+  // Relations
+  category   Category @relation(fields: [categoryId], references: [id])
+  
+  // Indexes for better performance
+  @@index([categoryId])
+  @@index([createdAt])
+  @@map("products")
+}
