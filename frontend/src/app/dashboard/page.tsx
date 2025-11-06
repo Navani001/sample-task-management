@@ -4,9 +4,9 @@ import React from 'react';
 import DynamicTabs from '@/component/tab';
 import type { TabItem } from '@/component/tab';
 import { useDynamicTabs } from '@/hooks/useDynamicTabs';
-import { ProductsTable, CategoryManager } from '@/app/dashbord/component';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { Package, Tag, Plus, BarChart3, Settings } from 'lucide-react';
+import { CategoryManager, ProductsTable } from './component';
 
 export default function DashboardPage() {
     const initialTabs: TabItem[] = [
