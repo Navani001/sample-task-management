@@ -11,7 +11,10 @@ interface ProductStatsProps {
 export const ProductStats: React.FC<ProductStatsProps> = ({ products }) => {
     const stats = React.useMemo(() => {
         const totalProducts = products.length;
-        const totalValue = products.reduce((sum, product) => sum + (product.price * product.stock), 0);
+        const totalValue = products.reduce((sum, product) => {
+            const price = typeof product.price === 'string' ? parseFloat(product.price) : product.price;
+            return sum + (price * product.stock);
+        }, 0);
         const lowStockProducts = products.filter(product => product.stock > 0 && product.stock < 10).length;
         const outOfStockProducts = products.filter(product => product.stock === 0).length;
 

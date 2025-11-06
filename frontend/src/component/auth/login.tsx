@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { ButtonComponent } from "@/component/button";
 
 export function SignIn() {
-   
+
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -19,7 +19,7 @@ export function SignIn() {
             signIn("credentials", {
                 username,
                 password,
-                redirectTo:"/"
+                redirectTo: "/"
             })
         } catch (error) {
             // handle error state here
@@ -63,8 +63,8 @@ export function SignIn() {
                     {error && <p style={{ color: "red" }}>{error}</p>}
                 </form>
             </div>
-            
-           
+
+
         </div>
     );
 }

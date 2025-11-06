@@ -1,25 +1,29 @@
 export interface Product {
-  _id?: string;
-  id?: string;
+  id: number;
   name: string;
-  category: string;
-  price: number;
+  categoryId: number;
+  category: {
+    id: number;
+    name: string;
+  };
+  price: string | number;
   stock: number;
+  isDeleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface ProductFormData {
   name: string;
-  category: string;
+  categoryId: number;
   price: number;
   stock: number;
 }
 
 export interface ApiResponse<T> {
   success: boolean;
+  message: string;
   data: T;
-  message?: string;
 }
 
 export interface ProductsResponse {
@@ -27,4 +31,9 @@ export interface ProductsResponse {
   total: number;
   page: number;
   limit: number;
+}
+
+// Helper interface for displaying product with category name
+export interface ProductDisplay extends Omit<Product, 'category'> {
+  category: string; // Just the category name for display
 }

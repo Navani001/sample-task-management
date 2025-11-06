@@ -37,7 +37,7 @@ export const Login = () => {
 
   return (
     <div className="w-[420px] bg-slate-50 rounded-2xl shadow-xl border-2 border-slate-200 p-8 font-medium">
-      
+
       <div className="flex flex-col gap-6">
         {/* RCS Branding Header */}
         <div className="text-center">
@@ -53,7 +53,7 @@ export const Login = () => {
           <h2 className="text-xl font-semibold text-slate-800 mb-2">Welcome Back</h2>
           <p className="text-slate-600 text-sm">Sign in to manage your RCS campaigns</p>
         </div>
-        
+
         {/* Login Form */}
         <div className="space-y-4">
           <Input
@@ -67,8 +67,8 @@ export const Login = () => {
               input: "border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-black",
               label: "text-slate-700 font-medium",
             }}
-             
-           
+
+
           />
           <Input
             value={password}
@@ -97,7 +97,7 @@ export const Login = () => {
               </button>
             }
           />
-          
+
           <ButtonComponent
             handleOnClick={handleLogin}
             buttonText={isLoading ? "Signing in..." : "Sign In"}
@@ -108,14 +108,14 @@ export const Login = () => {
             textClassName="text-white font-semibold"
           />
         </div>
-        
+
         {/* Divider */}
         <div className="flex items-center">
           <div className="flex-1 h-px bg-slate-300"></div>
           <span className="px-4 text-sm text-slate-500 font-medium">or</span>
           <div className="flex-1 h-px bg-slate-300"></div>
         </div>
-        
+
         {/* Google Sign In */}
         <ButtonComponent
           buttonIcon={<FcGoogle size={20} />}
@@ -124,8 +124,8 @@ export const Login = () => {
           baseClassName="w-full border-2 border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold py-3 rounded-xl transition-colors"
           textClassName="text-slate-700"
         />
-        
-        
+
+
         {/* Footer */}
         <div className="text-center pt-4 border-t border-slate-200">
           <p className="text-sm text-slate-600 font-medium">

@@ -46,10 +46,10 @@ export const CategoryManager: React.FC = () => {
         }
     };
 
-    const handleDeleteCategory = async (id: string) => {
-        setDeletingId(id);
+    const handleDeleteCategory = async (id: number) => {
+        setDeletingId(id.toString());
         try {
-            await deleteCategory(id);
+            await deleteCategory(id.toString());
         } finally {
             setDeletingId(null);
         }
@@ -166,7 +166,7 @@ export const CategoryManager: React.FC = () => {
                                                 buttonIcon={<Trash2 className="w-4 h-4" />}
                                                 ButtonVariant="light"
                                                 handleOnClick={() => handleDeleteCategory(category.id)}
-                                                baseClassName={`h-8 w-8 min-w-8 ${deletingId === category.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                baseClassName={`h-8 w-8 min-w-8 ${deletingId === category.id.toString() ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 buttonText=""
                                                 isIcon={true}
                                             />

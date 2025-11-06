@@ -30,15 +30,15 @@ export const useProducts = (): UseProductsReturn => {
   const { addToast } = useToast();
 
   // Get unique categories from products
-  const categories = Array.from(new Set(products.map(product => product.category)));
+  const categories = Array.from(new Set(products.map(product => product.category.name)));
 
   // Filter products based on search term and category
   const filteredProducts = products.filter(product => {
     const matchesSearch = searchTerm === '' || 
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase());
+      product.category.name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCategory = selectedCategory === '' || product.category === selectedCategory;
+    const matchesCategory = selectedCategory === '' || product.category.name === selectedCategory;
     
     return matchesSearch && matchesCategory;
   });
@@ -83,7 +83,7 @@ export const useProducts = (): UseProductsReturn => {
       if (updatedProduct) {
         setProducts(prev => 
           prev.map(product => 
-            (product._id === id || product.id === id) ? updatedProduct : product
+            product.id === parseInt(id) ? updatedProduct : product
           )
         );
         addToast('Product updated successfully!', 'success');
@@ -103,7 +103,7 @@ export const useProducts = (): UseProductsReturn => {
   const deleteProduct = async (id: string): Promise<boolean> => {
     try {
       await productService.deleteProduct(id);
-      setProducts(prev => prev.filter(product => product._id !== id && product.id !== id));
+      setProducts(prev => prev.filter(product => product.id !== parseInt(id)));
       addToast('Product deleted successfully!', 'success');
       return true;
     } catch (err) {

@@ -1,17 +1,15 @@
 
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
-import { auth } from "../auth";
-console.log(process.env.NEXT_PUBLIC_BASE_URL )
+
+console.log(process.env.NEXT_PUBLIC_BASE_URL+"hello" )
 // Create an Axios instance
 const axiosClient = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000/api/",// Replace with your API URL
+    baseURL: process.env.NEXT_PUBLIC_BASE_URL || "https://sample-task-management.vercel.app/api/",
     headers: {
         "Content-Type": "application/json",
         // Authorization: `Bearer ${auth()?.token || ""}`, // Use auth token if available
     },
 });
-
-//  **Request Interceptor**
 
 
 //  **Response Interceptor**

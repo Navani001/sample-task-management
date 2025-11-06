@@ -20,7 +20,6 @@ import { ButtonComponent } from '@/component/button'; interface ProductFormProps
     onSubmit: (product: ProductFormData) => Promise<boolean>;
     initialData?: Product | null;
     title?: string;
-    categories?: string[];
 }
 
 export const ProductForm: React.FC<ProductFormProps> = ({
@@ -28,30 +27,29 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     onClose,
     onSubmit,
     initialData = null,
-    title = "Add New Product",
-    categories = []
+    title = "Add New Product"
 }) => {
     const [formData, setFormData] = React.useState<ProductFormData>({
         name: '',
-        category: '',
+        categoryId: 0,
         price: 0,
         stock: 0
     });
     const [loading, setLoading] = React.useState(false);
-    const { categoryNames, addCategory } = useCategories();    // Reset form when modal opens/closes or initial data changes
+    const { categories, addCategory } = useCategories();    // Reset form when modal opens/closes or initial data changes
     React.useEffect(() => {
         if (isOpen) {
             if (initialData) {
                 setFormData({
                     name: initialData.name,
-                    category: initialData.category,
-                    price: initialData.price,
+                    categoryId: initialData.categoryId,
+                    price: typeof initialData.price === 'string' ? parseFloat(initialData.price) : initialData.price,
                     stock: initialData.stock
                 });
             } else {
                 setFormData({
                     name: '',
-                    category: '',
+                    categoryId: 0,
                     price: 0,
                     stock: 0
                 });
@@ -61,7 +59,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.name.trim() || !formData.category.trim()) {
+        if (!formData.name.trim() || !formData.categoryId || formData.categoryId === 0) {
             return;
         }
 
@@ -107,16 +105,23 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                                 isRequired
                             />
 
-                            <CategoryAutocomplete
+                            <Select
                                 label="Category"
-                                placeholder="Search or select a category"
-                                value={formData.category}
-                                onSelectionChange={(categoryName) => handleInputChange('category', categoryName)}
-                                categories={categoryNames}
+                                placeholder="Select a category"
+                                selectedKeys={formData.categoryId ? [formData.categoryId.toString()] : []}
+                                onSelectionChange={(keys) => {
+                                    const selected = Array.from(keys)[0] as string;
+                                    handleInputChange('categoryId', selected ? parseInt(selected) : 0);
+                                }}
                                 variant="bordered"
                                 isRequired
-                                onAddCategory={addCategory}
-                            />
+                            >
+                                {categories.map((category) => (
+                                    <SelectItem key={category.id.toString()}>
+                                        {category.name}
+                                    </SelectItem>
+                                ))}
+                            </Select>
 
                             <Input
                                 label="Price"

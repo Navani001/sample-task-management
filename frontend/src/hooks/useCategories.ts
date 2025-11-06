@@ -12,7 +12,6 @@ interface UseCategoriesReturn {
   addCategory: (name: string) => Promise<boolean>;
   deleteCategory: (id: string) => Promise<boolean>;
   refreshCategories: () => Promise<void>;
-  categoryExists: (name: string) => Promise<boolean>;
 }
 
 export const useCategories = (): UseCategoriesReturn => {
@@ -50,11 +49,7 @@ export const useCategories = (): UseCategoriesReturn => {
       }
 
       // Check if category already exists
-      const exists = await categoryService.categoryExists(trimmedName);
-      if (exists) {
-        addToast('Category already exists', 'error');
-        return false;
-      }
+     
 
       const newCategory = await categoryService.createCategory(trimmedName);
       if (newCategory) {
@@ -77,7 +72,7 @@ export const useCategories = (): UseCategoriesReturn => {
   const deleteCategory = async (id: string): Promise<boolean> => {
     try {
       await categoryService.deleteCategory(id);
-      setCategories(prev => prev.filter(cat => cat.id !== id));
+      setCategories(prev => prev.filter(cat => cat.id !== parseInt(id)));
       addToast('Category deleted successfully!', 'success');
       return true;
     } catch (err) {
@@ -88,15 +83,7 @@ export const useCategories = (): UseCategoriesReturn => {
     }
   };
 
-  // Check if category exists
-  const categoryExists = async (name: string): Promise<boolean> => {
-    try {
-      return await categoryService.categoryExists(name);
-    } catch (err) {
-      console.error('Error checking category existence:', err);
-      return false;
-    }
-  };
+
 
   // Load categories on component mount
   useEffect(() => {
@@ -111,6 +98,5 @@ export const useCategories = (): UseCategoriesReturn => {
     addCategory,
     deleteCategory,
     refreshCategories,
-    categoryExists,
   };
 };

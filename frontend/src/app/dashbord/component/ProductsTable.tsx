@@ -66,9 +66,9 @@ const ProductsTable: React.FC = () => {
 
     const handleFormSubmit = async (productData: any) => {
         if (editingProduct) {
-            const productId = editingProduct._id || editingProduct.id;
+            const productId = editingProduct.id;
             if (productId) {
-                return await updateProduct(productId, productData);
+                return await updateProduct(productId.toString(), productData);
             }
             return false;
         } else {
@@ -78,9 +78,9 @@ const ProductsTable: React.FC = () => {
 
     const handleDeleteConfirm = async () => {
         if (deletingProduct) {
-            const productId = deletingProduct._id || deletingProduct.id;
+            const productId = deletingProduct.id;
             if (productId) {
-                await deleteProduct(productId);
+                await deleteProduct(productId.toString());
             }
         }
     };
@@ -97,11 +97,12 @@ const ProductsTable: React.FC = () => {
         return 'In Stock';
     };
 
-    const formatPrice = (price: number) => {
+    const formatPrice = (price: string | number) => {
+        const numPrice = typeof price === 'string' ? parseFloat(price) : price;
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
-        }).format(price);
+        }).format(numPrice);
     };
 
     if (loading) {
@@ -215,7 +216,7 @@ const ProductsTable: React.FC = () => {
                             </TableHeader>
                             <TableBody emptyContent="No products found">
                                 {filteredProducts.map((product) => (
-                                    <TableRow key={product._id || product.id}>
+                                    <TableRow key={product.id}>
                                         <TableCell>
                                             <div className="flex flex-col">
                                                 <p className="font-medium">{product.name}</p>
@@ -223,7 +224,7 @@ const ProductsTable: React.FC = () => {
                                         </TableCell>
                                         <TableCell>
                                             <Chip size="sm" variant="flat" color="default">
-                                                {product.category}
+                                                {product.category.name}
                                             </Chip>
                                         </TableCell>
                                         <TableCell>
@@ -291,7 +292,6 @@ const ProductsTable: React.FC = () => {
                 onSubmit={handleFormSubmit}
                 initialData={editingProduct}
                 title={editingProduct ? 'Edit Product' : 'Add New Product'}
-                categories={categoryNames}
             />
 
             <DeleteConfirmation

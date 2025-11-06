@@ -32,17 +32,18 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onEdit, onDe
         return 'In Stock';
     };
 
-    const formatPrice = (price: number) => {
+    const formatPrice = (price: string | number) => {
+        const numPrice = typeof price === 'string' ? parseFloat(price) : price;
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
-        }).format(price);
+        }).format(numPrice);
     };
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {products.map((product) => (
-                <Card key={product._id || product.id} className="w-full">
+                <Card key={product.id} className="w-full">
                     <CardBody className="p-4">
                         {/* Product Image Placeholder */}
                         <div className="flex justify-center mb-3">
@@ -56,7 +57,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onEdit, onDe
                             <h4 className="font-semibold text-sm line-clamp-2">{product.name}</h4>
 
                             <Chip size="sm" variant="flat" color="default">
-                                {product.category}
+                                {product.category.name}
                             </Chip>
 
                             <div className="space-y-1">
